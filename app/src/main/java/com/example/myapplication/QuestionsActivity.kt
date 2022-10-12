@@ -157,7 +157,7 @@ class QuestionsActivity : AppCompatActivity(), View.OnClickListener {
                     currentPosition++
                     when {
                         currentPosition <= mQuestionList!!.size -> {
-                 `           setQuestion()
+                           setQuestion()
                         }
                         else ->{
                             Toast.makeText(this, "Test finished", Toast.LENGTH_SHORT).show()

@@ -1,6 +1,7 @@
 package com.example.myapplication
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -9,10 +10,14 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
 class QuestionsActivity : AppCompatActivity(), View.OnClickListener {
+
+    private var mUserName: String ?= null
+    private var mCorrectAnswers: Int = 0
 
     private var progressBar: ProgressBar? = null
     private var tvProgress: TextView? = null
@@ -32,6 +37,7 @@ class QuestionsActivity : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_questions)
+        mUserName = intent.getStringExtra(Constants.USER_NAME)
 
         progressBar = findViewById(R.id.progressBar)
         tvProgress = findViewById(R.id.tv_progress)
@@ -55,6 +61,7 @@ class QuestionsActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun setQuestion() {
+        defaultOptionsView()
         val question: Question = mQuestionList!![currentPosition - 1]
         progressBar?.progress = currentPosition
         tvProgress?.text = "$currentPosition / ${progressBar?.max}"
@@ -106,19 +113,19 @@ class QuestionsActivity : AppCompatActivity(), View.OnClickListener {
         )
     }
 
-    private fun answerView(answer: Int, drawableView: Int){
-        when(answer){
+    private fun answerView(answer: Int, drawableView: Int) {
+        when (answer) {
             1 -> {
-                tvOption1?.background = ContextCompat.getDrawable(this,drawableView)
+                tvOption1?.background = ContextCompat.getDrawable(this, drawableView)
             }
             2 -> {
-                tvOption2?.background = ContextCompat.getDrawable(this,drawableView)
+                tvOption2?.background = ContextCompat.getDrawable(this, drawableView)
             }
             3 -> {
-                tvOption3?.background = ContextCompat.getDrawable(this,drawableView)
+                tvOption3?.background = ContextCompat.getDrawable(this, drawableView)
             }
             4 -> {
-                tvOption4?.background = ContextCompat.getDrawable(this,drawableView)
+                tvOption4?.background = ContextCompat.getDrawable(this, drawableView)
             }
         }
     }
@@ -146,25 +153,39 @@ class QuestionsActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
             R.id.btn_submit -> {
-                if (mSelectedOption == 0){
+                if (mSelectedOption == 0) {
                     currentPosition++
-                    when{
+                    when {
                         currentPosition <= mQuestionList!!.size -> {
-                            setQuestion()
+                 `           setQuestion()
+                        }
+                        else ->{
+                            Toast.makeText(this, "Test finished", Toast.LENGTH_SHORT).show()
+                            val intent: Intent = Intent(this, ResultActivity::class.java)
+                            intent.putExtra(Constants.USER_NAME,mUserName)
+                            intent.putExtra(Constants.CORRECT_ANSWERS,mCorrectAnswers)
+                            intent.putExtra(Constants.TOTAL_QUESTIONS,mQuestionList?.size)
+                            startActivity(intent)
+                            finish()
                         }
                     }
-                } else{
-                    val question = mQuestionList?.get(currentPosition -1)
-                    if (question!!.correctOption != mSelectedOption){
+                } else {
+                    val question = mQuestionList?.get(currentPosition - 1)
+                    if (question!!.correctOption != mSelectedOption) {
                         answerView(mSelectedOption, R.drawable.wrong_option_border_bg)
+                    }
+                    else{
+                        mCorrectAnswers++
                     }
                     answerView(question.correctOption, R.drawable.correct_option_border_bg)
 
-                    if (currentPosition == mQuestionList!!.size){
-
+                    if (currentPosition == mQuestionList!!.size) {
+                        btnSubmit?.text = "Finish"
+                    } else {
+                        btnSubmit?.text = "Go to next question"
                     }
+                    mSelectedOption = 0
                 }
-
             }
         }
     }
